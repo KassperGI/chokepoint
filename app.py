@@ -2,23 +2,22 @@ import streamlit as st
 from google import genai
 import time
 
+# Set up the Gemini client
 client = genai.Client()
 
+# Set page config
 st.set_page_config(page_title="ChokePoint | Hardware Roaster", page_icon="🕹️", layout="centered")
 
 # --- ARCADE CSS INJECTION ---
 st.markdown("""
 <style>
-    /* Import retro arcade font from Google */
     @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
     
-    /* Apply font to everything */
     html, body, [class*="css"] {
         font-family: 'VT323', monospace !important;
         font-size: 22px !important;
     }
     
-    /* Glowing Arcade Title */
     h1 {
         font-size: 70px !important;
         text-shadow: 4px 4px 0px #880000, 0px 0px 20px #ff0000;
@@ -34,7 +33,6 @@ st.markdown("""
         font-size: 28px !important;
     }
 
-    /* Chunky Arcade Inputs */
     .stTextInput>div>div>input, .stSelectbox>div>div>div {
         background-color: #1a0000 !important;
         border: 2px solid #ff4b4b !important;
@@ -45,7 +43,6 @@ st.markdown("""
         font-size: 20px !important;
     }
 
-    /* The "Insert Coin" Button */
     .stButton > button {
         background-color: #000000 !important;
         border: 4px solid #ff4b4b !important;
@@ -60,7 +57,6 @@ st.markdown("""
         margin-top: 20px;
     }
     
-    /* Button click physical pressing effect */
     .stButton > button:active {
         transform: translate(6px, 6px);
         box-shadow: 0px 0px 0px #880000;
@@ -72,20 +68,18 @@ st.markdown("""
         text-shadow: none !important;
     }
     
-    /* Subtle CRT Scanlines */
     .block-container {
         background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
         background-size: 100% 4px;
     }
 </style>
 """, unsafe_allow_html=True)
-# ----------------------------
 
 st.markdown("<h1>CHOKEPOINT</h1>", unsafe_allow_html=True)
 st.markdown("<h3>>>> SYSTEM LOADOUT SELECTOR <<<</h3>", unsafe_allow_html=True)
 st.markdown("<br>", unsafe_allow_html=True)
 
-# UI Inputs themed like a game loadout
+# UI Inputs
 col1, col2 = st.columns(2)
 
 with col1:
@@ -103,37 +97,35 @@ with col2:
     ])
     price = st.text_input("COINS EXPENDED (PRICE)", placeholder="e.g., $1200 or ₹90,000")
 
-# The Big Arcade Button
 if st.button("INSERT COIN TO ANALYZE"):
     if cpu and gpu and storage and price:
         
-        # --- THE GAMIFIED LOADING ANIMATION ---
         progress_bar = st.progress(0)
         status_text = st.empty()
         
         status_text.markdown("<h3>[SCANNING CPU ARCHITECTURE...]</h3>", unsafe_allow_html=True)
-        time.sleep(0.6)
+        time.sleep(0.4)
         progress_bar.progress(25)
         
         status_text.markdown("<h3>[STRESS TESTING GPU VRAM...]</h3>", unsafe_allow_html=True)
-        time.sleep(0.6)
+        time.sleep(0.4)
         progress_bar.progress(50)
         
         status_text.markdown("<h3>[MOCKING THERMAL PERFORMANCE...]</h3>", unsafe_allow_html=True)
-        time.sleep(0.6)
+        time.sleep(0.4)
         progress_bar.progress(80)
         
         status_text.markdown("<h3>[CALCULATING FINANCIAL RUIN...]</h3>", unsafe_allow_html=True)
-        time.sleep(0.6)
+        time.sleep(0.4)
         progress_bar.progress(100)
-        # --------------------------------------
 
+        # Updated prompt instructions
         prompt = f"""
-        You are an aggressive, arcade-style AI boss. Analyze these specs for the chosen mission.
+        You are an aggressive, arcade-style AI boss analyzing PC specifications.
         Specs: CPU: {cpu}, GPU: {gpu}, RAM: {ram}, Storage: {storage}. 
-        Mission (Workload): {workload}. Price: {price}.
+        Mission (Workload): {workload}. User's Listed Price: {price}.
         
-        Output in exactly three short sections using Markdown headings:
+        Output in exactly four short sections using Markdown headings:
         ###  THE ROAST
         Point out the exact bottleneck mercilessly like a video game villain.
         
@@ -141,7 +133,10 @@ if st.button("INSERT COIN TO ANALYZE"):
         The most practical component upgrade path to defeat the bottleneck.
         
         ###  MERCHANT APPRAISAL
-        Brutally honest verdict on whether they got scammed by the merchant or found a rare loot drop for {price}.
+        Brutally honest verdict on whether their listed price of {price} is a scam or a rare loot drop.
+        
+        ###  IDEAL MARKET VALUE
+        Provide a realistic, fair market price range (matching the currency system they typed in: {price}) that they SHOULD ideally be paying for these exact components in today's market.
         """
         
         try:
@@ -149,7 +144,6 @@ if st.button("INSERT COIN TO ANALYZE"):
                 model='gemini-2.5-flash',
                 contents=prompt,
             )
-            # Clear the loading animations
             status_text.empty()
             progress_bar.empty()
             
