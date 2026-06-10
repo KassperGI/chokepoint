@@ -7,7 +7,7 @@ import os
 client = genai.Client()
 
 # Set page config
-st.set_page_config(page_title="ChokePoint | Hardware Diagnostic", page_icon="⚙️", layout="wide")
+st.set_page_config(page_title="ChokePoint | Hardware Diagnostic", page_icon="-_-", layout="wide")
 
 # --- NOTHING TECH AESTHETIC CSS INJECTION ---
 st.markdown("""
