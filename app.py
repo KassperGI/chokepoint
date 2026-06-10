@@ -6,19 +6,15 @@ import os
 # Set up the Gemini client
 client = genai.Client()
 
-# Set page config to widen and use a more utilitarian icon
+# Set page config
 st.set_page_config(page_title="ChokePoint | Hardware Diagnostic", page_icon="⚙️", layout="wide")
 
 # --- NOTHING TECH AESTHETIC CSS INJECTION ---
-# Custom CSS for stark white on black, dot-matrix fonts, modular grids, and authoritarian style
-# We will use two specific fonts: 'Nothing' dot-matrix and a clean monospace.
 st.markdown("""
 <style>
-    /* Import dot-matrix and clean monospace fonts from Google for ultimate styling control */
     @import url('https://fonts.googleapis.com/css2?family=Major+Mono+Display&display=swap');
     @import url('https://fonts.googleapis.com/css2?family=Cutive+Mono&display=swap');
     
-    /* Apply base styling: jet black background, stark white text, strict borders */
     html, body, [class*="css"] {
         background-color: #000000 !important;
         color: #ffffff !important;
@@ -27,7 +23,6 @@ st.markdown("""
         line-height: 1.5;
     }
     
-    /* STARK AUTHORITARIAN TITLE in Dot-Matrix, perfectly centered */
     h1 {
         font-family: 'Major Mono Display', monospace !important;
         font-size: 80px !important;
@@ -48,7 +43,6 @@ st.markdown("""
         font-weight: normal;
     }
 
-    /* Utilitarian Section Titles: Stark Gray Dot-Matrix */
     h4 {
         font-family: 'Major Mono Display', monospace !important;
         color: #777777 !important;
@@ -60,8 +54,8 @@ st.markdown("""
         text-align: left;
     }
 
-    /* Modular, stark Input Fields with zero complexity */
-    .stTextInput>div>div>input, .stSelectbox>div>div>div {
+    /* Standard text inputs */
+    .stTextInput>div>div>input {
         background-color: #000000 !important;
         border: 1px solid #777777 !important;
         color: #ffffff !important;
@@ -71,12 +65,25 @@ st.markdown("""
         transition: border-color 0.2s ease;
     }
 
+    /* FIX: Select box adjustment to prevent text clipping */
+    .stSelectbox>div>div>div {
+        background-color: #000000 !important;
+        border: 1px solid #777777 !important;
+        color: #ffffff !important;
+        border-radius: 0px !important;
+        padding: 6px 15px !important; /* Reduced vertical padding to prevent clipping */
+        font-size: 18px !important;
+        min-height: 56px !important; /* Ensures plenty of room for text */
+        display: flex !important;
+        align-items: center !important;
+        transition: border-color 0.2s ease;
+    }
+
     .stTextInput>div>div>input:focus, .stSelectbox>div>div>div:focus {
         border-color: #ffffff !important;
         box-shadow: none !important;
     }
 
-    /* Redefine button to be a stark, low-profile element */
     .stButton > button {
         background-color: #ffffff !important;
         color: #000000 !important;
@@ -95,14 +102,12 @@ st.markdown("""
         color: #ffffff !important;
     }
     
-    /* Clean Progress Bar Styling */
     .stProgress > div > div > div > div {
         background-color: #ffffff !important;
         border-radius: 0px !important;
         height: 8px;
     }
 
-    /* Structured modular boxes for AI Output: Red headings, clean borders, dark gray backgrounds */
     .ai-output-section {
         background-color: #111111;
         border: 1px solid #777777;
@@ -112,7 +117,7 @@ st.markdown("""
 
     .ai-output-section h3 {
         font-family: 'Major Mono Display', monospace !important;
-        color: #ff4b4b !important; /* Muted red for critical diagnostic headings */
+        color: #ff4b4b !important;
         font-size: 28px !important;
         letter-spacing: 2px;
         text-transform: uppercase;
@@ -126,7 +131,6 @@ st.markdown("""
         line-height: 1.6;
     }
     
-    /* Price Fact Box: Specific styled fact */
     .fact-box {
         background-color: #111111;
         border: 2px solid #ff4b4b;
@@ -138,21 +142,18 @@ st.markdown("""
         border-radius: 0px;
     }
 
-    /* Horizontal Divider for section breaks */
     .horizontal-line {
         border-bottom: 1px solid #777777;
         margin: 50px 0;
     }
 </style>
 """, unsafe_allow_html=True)
-# ----------------------------
 
 st.markdown("<h1>CHOKEPOINT</h1>", unsafe_allow_html=True)
 st.markdown("<h3>>>> BRUTAL HARDWARE BOTTLENECK DIAGNOSTIC <<<</h3>", unsafe_allow_html=True)
 st.markdown("<div class='horizontal-line'></div>", unsafe_allow_html=True)
 
-# MODULAR GRID LAYOUT themed like a precise diagnostic spec-sheet
-# Using 3 columns for 6 inputs in a clean, utilitarian grid
+# MODULAR GRID LAYOUT
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -177,12 +178,9 @@ with col3:
 
 st.markdown("<br><br>", unsafe_allow_html=True)
 
-# The Stark-White Stark Button
 if st.button("RUN DIAGNOSTIC PROTOCOL"):
     if cpu and gpu and storage and price:
         
-        # --- THE GAMIFIED LOAD FLOW -> AUTHORITARIAN SYSTEM SCAN ---
-        # No more game art or funny text. A stark, fast scanning protocol.
         progress_bar = st.progress(0)
         status_text = st.empty()
         
@@ -201,9 +199,7 @@ if st.button("RUN DIAGNOSTIC PROTOCOL"):
         status_text.markdown("<h3>>>> COMPILING INSULTS... <<<</h3>", unsafe_allow_html=True)
         time.sleep(0.3)
         progress_bar.progress(100)
-        # ------------------------------------------------------------
 
-        # Updated prompt instructions to maintain sarcasm but framed as a precise system
         prompt = f"""
         You are a cold, calculated, slightly aggressive authoritarian system diagnostic AI analyzing PC specifications.
         Specs: CPU: {cpu}, GPU: {gpu}, RAM: {ram}GB, Storage: {storage}. 
@@ -230,16 +226,14 @@ if st.button("RUN DIAGNOSTIC PROTOCOL"):
                 contents=prompt,
             )
             
-            # Clear loading protocols
             status_text.empty()
             progress_bar.empty()
             st.success(">>> SYSTEM CHECK COMPLETE. <<<") 
             
-            # PARSE THE RESPONSE to structure it inside modular boxes using the custom CSS
             diagnostic_output = response.text
             sections = diagnostic_output.split('###')
             
-            for section in sections[1:]: # Skip the first empty string before the first heading
+            for section in sections[1:]:
                 if section.strip():
                     heading, text = section.strip().split('\n', 1)
                     if "FAIR ACQUISITION VALUE" in heading:
