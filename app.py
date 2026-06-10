@@ -1,141 +1,226 @@
 import streamlit as st
 from google import genai
 import time
+import os
 
 # Set up the Gemini client
 client = genai.Client()
 
-# Set page config
-st.set_page_config(page_title="ChokePoint | Hardware Roaster", page_icon="🕹️", layout="centered")
+# Set page config to widen and use a more utilitarian icon
+st.set_page_config(page_title="ChokePoint | Hardware Diagnostic", page_icon="⚙️", layout="wide")
 
-# --- ARCADE CSS INJECTION ---
+# --- NOTHING TECH AESTHETIC CSS INJECTION ---
+# Custom CSS for stark white on black, dot-matrix fonts, modular grids, and authoritarian style
+# We will use two specific fonts: 'Nothing' dot-matrix and a clean monospace.
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+    /* Import dot-matrix and clean monospace fonts from Google for ultimate styling control */
+    @import url('https://fonts.googleapis.com/css2?family=Major+Mono+Display&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Cutive+Mono&display=swap');
     
+    /* Apply base styling: jet black background, stark white text, strict borders */
     html, body, [class*="css"] {
-        font-family: 'VT323', monospace !important;
-        font-size: 22px !important;
+        background-color: #000000 !important;
+        color: #ffffff !important;
+        font-family: 'Cutive+Mono', monospace !important;
+        font-size: 18px !important;
+        line-height: 1.5;
     }
     
+    /* STARK AUTHORITARIAN TITLE in Dot-Matrix, perfectly centered */
     h1 {
-        font-size: 70px !important;
-        text-shadow: 4px 4px 0px #880000, 0px 0px 20px #ff0000;
-        color: #ff4b4b !important;
+        font-family: 'Major Mono Display', monospace !important;
+        font-size: 80px !important;
+        color: #ffffff !important;
         text-align: center;
-        letter-spacing: 4px;
-        margin-bottom: 0px !important;
+        letter-spacing: 5px;
+        text-transform: uppercase;
+        margin-top: 50px;
+        margin-bottom: 10px !important;
     }
 
     h3 {
-        color: #ff9999 !important;
+        font-family: 'Cutive+Mono', monospace !important;
+        color: #ffffff !important;
         text-align: center;
-        font-size: 28px !important;
+        font-size: 26px !important;
+        margin-bottom: 60px !important;
+        font-weight: normal;
     }
 
+    /* Utilitarian Section Titles: Stark Gray Dot-Matrix */
+    h4 {
+        font-family: 'Major Mono Display', monospace !important;
+        color: #777777 !important;
+        font-size: 22px !important;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-top: 40px !important;
+        margin-bottom: 20px !important;
+        text-align: left;
+    }
+
+    /* Modular, stark Input Fields with zero complexity */
     .stTextInput>div>div>input, .stSelectbox>div>div>div {
-        background-color: #1a0000 !important;
-        border: 2px solid #ff4b4b !important;
+        background-color: #000000 !important;
+        border: 1px solid #777777 !important;
         color: #ffffff !important;
         border-radius: 0px !important;
-        padding: 10px !important;
-        box-shadow: 3px 3px 0px #ff4b4b;
-        font-size: 20px !important;
+        padding: 15px !important;
+        font-size: 18px !important;
+        transition: border-color 0.2s ease;
     }
 
+    .stTextInput>div>div>input:focus, .stSelectbox>div>div>div:focus {
+        border-color: #ffffff !important;
+        box-shadow: none !important;
+    }
+
+    /* Redefine button to be a stark, low-profile element */
     .stButton > button {
-        background-color: #000000 !important;
-        border: 4px solid #ff4b4b !important;
-        color: #ff4b4b !important;
-        font-family: 'VT323', monospace !important;
-        font-size: 32px !important;
-        padding: 15px 30px !important;
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        font-family: 'Major Mono Display', monospace !important;
+        font-size: 28px !important;
+        padding: 15px 40px !important;
         border-radius: 0px !important;
-        box-shadow: 6px 6px 0px #880000;
-        transition: all 0.1s ease-in-out;
+        border: 1px solid #ffffff !important;
         width: 100%;
-        margin-top: 20px;
+        margin-top: 50px;
+        transition: all 0.2s ease;
     }
     
-    .stButton > button:active {
-        transform: translate(6px, 6px);
-        box-shadow: 0px 0px 0px #880000;
+    .stButton > button:hover {
+        background-color: #000000 !important;
+        color: #ffffff !important;
+    }
+    
+    /* Clean Progress Bar Styling */
+    .stProgress > div > div > div > div {
+        background-color: #ffffff !important;
+        border-radius: 0px !important;
+        height: 8px;
     }
 
-    .stButton > button:hover {
-        background-color: #ff4b4b !important;
-        color: #000 !important;
-        text-shadow: none !important;
+    /* Structured modular boxes for AI Output: Red headings, clean borders, dark gray backgrounds */
+    .ai-output-section {
+        background-color: #111111;
+        border: 1px solid #777777;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+
+    .ai-output-section h3 {
+        font-family: 'Major Mono Display', monospace !important;
+        color: #ff4b4b !important; /* Muted red for critical diagnostic headings */
+        font-size: 28px !important;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 15px;
+        text-align: left;
+    }
+
+    .ai-output-section p {
+        color: #ffffff;
+        font-size: 18px;
+        line-height: 1.6;
     }
     
-    .block-container {
-        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
-        background-size: 100% 4px;
+    /* Price Fact Box: Specific styled fact */
+    .fact-box {
+        background-color: #111111;
+        border: 2px solid #ff4b4b;
+        padding: 20px;
+        margin-top: 30px;
+        color: #ffffff;
+        font-size: 22px;
+        text-align: center;
+        border-radius: 0px;
+    }
+
+    /* Horizontal Divider for section breaks */
+    .horizontal-line {
+        border-bottom: 1px solid #777777;
+        margin: 50px 0;
     }
 </style>
 """, unsafe_allow_html=True)
+# ----------------------------
 
 st.markdown("<h1>CHOKEPOINT</h1>", unsafe_allow_html=True)
-st.markdown("<h3>>>> SYSTEM LOADOUT SELECTOR <<<</h3>", unsafe_allow_html=True)
-st.markdown("<br>", unsafe_allow_html=True)
+st.markdown("<h3>>>> BRUTAL HARDWARE BOTTLENECK DIAGNOSTIC <<<</h3>", unsafe_allow_html=True)
+st.markdown("<div class='horizontal-line'></div>", unsafe_allow_html=True)
 
-# UI Inputs
-col1, col2 = st.columns(2)
+# MODULAR GRID LAYOUT themed like a precise diagnostic spec-sheet
+# Using 3 columns for 6 inputs in a clean, utilitarian grid
+col1, col2, col3 = st.columns(3)
 
 with col1:
-    cpu = st.text_input("PLAYER CPU", placeholder="e.g., Ryzen 5 5600X")
-    gpu = st.text_input("PLAYER GPU", placeholder="e.g., RTX 4060")
-    ram = st.selectbox("SYSTEM MEMORY", ["4GB", "8GB", "16GB", "32GB", "64GB", "128GB"])
+    st.markdown("<h4>>>> SYSTEM SPECIFICATIONS <<<</h4>", unsafe_allow_html=True)
+    cpu = st.text_input("CPU / central processing unit", placeholder="e.g., Ryzen 7 5700X")
+    gpu = st.text_input("GPU / graphics processing unit", placeholder="e.g., RTX 3070 Ti")
 
 with col2:
-    storage = st.text_input("STORAGE DRIVE", placeholder="e.g., 1TB NVMe SSD")
-    workload = st.selectbox("MISSION TYPE (WORKLOAD)", [
+    st.markdown("<h4>>>> OPERATIONAL USE CASE <<<</h4>", unsafe_allow_html=True)
+    ram = st.selectbox("MEMORY / sys_mem (GB)", ["4", "8", "16", "32", "64", "128"])
+    storage = st.text_input("STORAGE / non-volatile_sys_drive", placeholder="e.g., 2TB NVMe SSD")
+
+with col3:
+    st.markdown("<h4>>>> ACQUISITION PARAMETERS <<<</h4>", unsafe_allow_html=True)
+    workload = st.selectbox("OPERATIONAL_USE_CASE / mission_type", [
         "3D Rendering & Animation", 
         "Video Editing", 
         "Software Development",
         "AAA Gaming"
     ])
-    price = st.text_input("COINS EXPENDED (PRICE)", placeholder="e.g., $1200 or ₹90,000")
+    price = st.text_input("COINS EXPENDED / current_acquisition_cost", placeholder="e.g., $1800 or ₹1,40,000")
 
-if st.button("INSERT COIN TO ANALYZE"):
+st.markdown("<br><br>", unsafe_allow_html=True)
+
+# The Stark-White Stark Button
+if st.button("RUN DIAGNOSTIC PROTOCOL"):
     if cpu and gpu and storage and price:
         
+        # --- THE GAMIFIED LOAD FLOW -> AUTHORITARIAN SYSTEM SCAN ---
+        # No more game art or funny text. A stark, fast scanning protocol.
         progress_bar = st.progress(0)
         status_text = st.empty()
         
-        status_text.markdown("<h3>[SCANNING CPU ARCHITECTURE...]</h3>", unsafe_allow_html=True)
-        time.sleep(0.4)
+        status_text.markdown("<h3>>>> INITIATING DIAGNOSTIC... <<<</h3>", unsafe_allow_html=True)
+        time.sleep(0.3)
         progress_bar.progress(25)
         
-        status_text.markdown("<h3>[STRESS TESTING GPU VRAM...]</h3>", unsafe_allow_html=True)
-        time.sleep(0.4)
+        status_text.markdown("<h3>>>> ISOLATING PERFORMANCE BOTTLENECKS... <<<</h3>", unsafe_allow_html=True)
+        time.sleep(0.3)
         progress_bar.progress(50)
         
-        status_text.markdown("<h3>[MOCKING THERMAL PERFORMANCE...]</h3>", unsafe_allow_html=True)
-        time.sleep(0.4)
+        status_text.markdown("<h3>>>> CALCULATING FINANCIAL EFFICIENCY... <<<</h3>", unsafe_allow_html=True)
+        time.sleep(0.3)
         progress_bar.progress(80)
         
-        status_text.markdown("<h3>[CALCULATING FINANCIAL RUIN...]</h3>", unsafe_allow_html=True)
-        time.sleep(0.4)
+        status_text.markdown("<h3>>>> COMPILING INSULTS... <<<</h3>", unsafe_allow_html=True)
+        time.sleep(0.3)
         progress_bar.progress(100)
+        # ------------------------------------------------------------
 
-        # Updated prompt instructions
+        # Updated prompt instructions to maintain sarcasm but framed as a precise system
         prompt = f"""
-        You are an aggressive, arcade-style AI boss analyzing PC specifications.
-        Specs: CPU: {cpu}, GPU: {gpu}, RAM: {ram}, Storage: {storage}. 
-        Mission (Workload): {workload}. User's Listed Price: {price}.
+        You are a cold, calculated, slightly aggressive authoritarian system diagnostic AI analyzing PC specifications.
+        Specs: CPU: {cpu}, GPU: {gpu}, RAM: {ram}GB, Storage: {storage}. 
+        Operational Use Case (Workload): {workload}. Listed Price: {price}.
         
-        Output in exactly four short sections using Markdown headings:
-        ###  THE ROAST
-        Point out the exact bottleneck mercilessly like a video game villain.
+        Output four distinct, short sections in Markdown, framing your roast as precise technical analysis. Do NOT use emojis. Frame upgrade path as required optimization.
         
-        ###  UPGRADE TREE
-        The most practical component upgrade path to defeat the bottleneck.
+        ### PERFORMANCE DIAGNOSTIC (ROAST)
+        Point out the central performance limitation with icy sarcasm.
         
-        ###  MERCHANT APPRAISAL
-        Brutally honest verdict on whether their listed price of {price} is a scam or a rare loot drop.
+        ### REQUIRED OPTIMIZATION (THE FIX)
+        The primary prioritized component upgrade required.
         
-        ###  IDEAL MARKET VALUE
+        ### FINANCIAL AUDIT (VALUE CHECK)
+        Brutal verdict on whether their listed price of {price} is a rare good deal or a financial scam.
+        
+        ### FAIR ACQUISITION VALUE (RECOMMENDATION)
         Provide a realistic, fair market price range (matching the currency system they typed in: {price}) that they SHOULD ideally be paying for these exact components in today's market.
         """
         
@@ -144,12 +229,25 @@ if st.button("INSERT COIN TO ANALYZE"):
                 model='gemini-2.5-flash',
                 contents=prompt,
             )
+            
+            # Clear loading protocols
             status_text.empty()
             progress_bar.empty()
+            st.success(">>> SYSTEM CHECK COMPLETE. <<<") 
             
-            st.success(">>> GAME OVER. READ AND WEEP. <<<") 
-            st.write(response.text)
+            # PARSE THE RESPONSE to structure it inside modular boxes using the custom CSS
+            diagnostic_output = response.text
+            sections = diagnostic_output.split('###')
+            
+            for section in sections[1:]: # Skip the first empty string before the first heading
+                if section.strip():
+                    heading, text = section.strip().split('\n', 1)
+                    if "FAIR ACQUISITION VALUE" in heading:
+                        st.markdown(f"<div class='fact-box'><h3>>>> {heading.strip()} <<<</h3><p>{text.strip()}</p></div>", unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"<div class='ai-output-section'><h3>>>> {heading.strip()} <<<</h3><p>{text.strip()}</p></div>", unsafe_allow_html=True)
+                        
         except Exception as e:
             st.error(f"SYSTEM FAILURE. Details: {e}")
     else:
-        st.error(">>> ERROR: INCOMPLETE LOADOUT. EQUIP ALL ITEMS FIRST. <<<")
+        st.error(">>> ERROR: INCOMPLETE LOADOUT. EQUIP ALL ITEMS PROTOCOL FAILED. <<<")
