@@ -65,13 +65,13 @@ st.markdown("""
         transition: border-color 0.2s ease;
     }
 
-    /* FIX: Select box adjustment to prevent text clipping */
+    /* Select box adjustment to prevent text clipping */
     .stSelectbox>div>div>div {
         background-color: #000000 !important;
         border: 1px solid #777777 !important;
         color: #ffffff !important;
         border-radius: 0px !important;
-        padding: 6px 15px !important; /* Reduced vertical padding to prevent clipping */
+        padding: 6px 15px !important; /* Reduced vertical padding */
         font-size: 18px !important;
         min-height: 56px !important; /* Ensures plenty of room for text */
         display: flex !important;
