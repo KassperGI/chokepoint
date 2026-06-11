@@ -201,20 +201,23 @@ if st.button("RUN DIAGNOSTIC PROTOCOL"):
         progress_bar.progress(100)
 
         prompt = f"""
-        You are a cold, calculated, slightly aggressive authoritarian system diagnostic AI analyzing PC specifications.
+        You are a cold, calculated, authoritarian system diagnostic AI analyzing PC specifications.
         Specs: CPU: {cpu}, GPU: {gpu}, RAM: {ram}GB, Storage: {storage}. 
         Operational Use Case (Workload): {workload}. Listed Price: {price}.
         
-        Output four distinct, short sections in Markdown, framing your roast as precise technical analysis. Do NOT use emojis. Frame upgrade path as required optimization.
+        Evaluate the system balance and price-to-performance ratio. 
+        Output four distinct, short sections in Markdown, framing your response as precise technical analysis. Do NOT use emojis.
         
-        ### PERFORMANCE DIAGNOSTIC (ROAST)
-        Point out the central performance limitation with icy sarcasm.
+        ### PERFORMANCE DIAGNOSTIC (SYSTEM EVALUATION)
+        If the build is unbalanced or the hardware is weak for the workload: Point out the central limitation with icy, authoritarian sarcasm (Roast them).
+        If the build is well-balanced, powerful, and highly appropriate for the workload: Issue a cold, calculated compliment acknowledging their technical competence. State that the system parameters are "ACCEPTABLE."
         
         ### REQUIRED OPTIMIZATION (THE FIX)
-        The primary prioritized component upgrade required.
+        If a bottleneck exists: The primary prioritized component upgrade required.
+        If the build is already perfect: State "NO ALTERATIONS REQUIRED. SYSTEM OPTIMIZED."
         
         ### FINANCIAL AUDIT (VALUE CHECK)
-        Brutal verdict on whether their listed price of {price} is a rare good deal or a financial scam.
+        Brutal verdict on whether their listed price of {price} is a financial scam, an average market rate, or a highly efficient acquisition.
         
         ### FAIR ACQUISITION VALUE (RECOMMENDATION)
         Provide a realistic, fair market price range (matching the currency system they typed in: {price}) that they SHOULD ideally be paying for these exact components in today's market.
