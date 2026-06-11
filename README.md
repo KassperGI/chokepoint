@@ -15,7 +15,7 @@ A stark, minimalist hardware diagnostic tool powered by LLMs. It evaluates PC co
 
 ### >>> SYSTEM ARCHITECTURE
 * **Frontend/UI:** Streamlit (Python) with Custom HTML/CSS Injection
-* **Intelligence Engine:** Google Gemini API (`gemini-2.5-flash`)
+* **Intelligence Engine:** Google Gemini API (`gemini-2.5-flash-lite`)
 * **Typography:** `Major Mono Display` & `Cutive Mono`
 
 ---
